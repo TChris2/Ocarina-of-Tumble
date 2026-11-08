@@ -7,10 +7,11 @@ using UnityEngine.UI;
 public class Ocarina : MonoBehaviour
 {
     [SerializeField] private AudioSource audioSource;
+    [Tooltip("List of ocarina RT SFXs")]
     [SerializeField] private List<AudioClip> clipList = new List<AudioClip>();
     [SerializeField] bool isMusicPlaying;
-    // Tells the script to stop playing the music
-    [SerializeField] bool stopMusic;
+    // Tracks music coroutine
+    private Coroutine musicCoroutine;
 
     [Header("General UI")]
     [SerializeField] private GameObject notePrefab;
@@ -19,27 +20,31 @@ public class Ocarina : MonoBehaviour
     [SerializeField] private Button deleteNoteBtn;
     [SerializeField] private CanvasGroup ocarinaCG;
 
-    [Header("sheet UI")]
+    [Header("Sheet UI")]
     [SerializeField] private ScrollRect scrollRect; 
     [SerializeField] private Scrollbar scrollbar;
     [SerializeField] private Transform noteList;
-    // Tracks whole note objects
-    [SerializeField] private List<GameObject> noteObjQueue = new List<GameObject>();
-    // Tracks specific note images
-    [SerializeField] private List<Image> noteImageQueue = new List<Image>();
-    // Color changes when the note is highlighted
+    [Tooltip("Color swapped to when note is highlighted")]
     [SerializeField] private Color colorHighlight;
 
-    [Header("Playing Music")]
-    [Tooltip("Tracks the order of clips to play")]
-    [SerializeField] private List<int> queueIDList = new List<int>();
-    // Delay between clips
+    [Header("Audio")]
+    [Tooltip("Delay between clips")]
     [SerializeField] private float delay = 1;
-    // Default length when blank clip is played
+    [Tooltip("Default length when blank clip is played")]
     [SerializeField] private float defaultLength = 1;
 
+    [Header("List tracking")]
+    [Tooltip("Tracks the order of clips to play")]
+    [SerializeField] private List<int> queueIDList = new List<int>();
+    [Tooltip("Tracks whole note objects created")]
+    [SerializeField] private List<GameObject> noteObjQueue = new List<GameObject>();
+    [Tooltip("Tracks specific note images used in inside the created prefabs")]
+    [SerializeField] private List<Image> noteImageQueue = new List<Image>();
+
+    #region Note logic
+
     // Adds music to queue
-    public void AddMusic(int id)
+    public void AddNote(int id)
     {
         queueIDList.Add(id);
         
@@ -54,12 +59,13 @@ public class Ocarina : MonoBehaviour
         noteObjQueue.Add(noteObj);
 
         // Goes to new note
-        ScrollToNote(noteObjQueue.Count - 1);
+        _ScrollToNote(noteObjQueue.Count - 1);
     }
 
     // Clears sheet
     public void ClearMusic()
     {
+        // Doesn't do anything if queue is empty
         if (queueIDList.Count == 0) return;
 
         queueIDList.Clear();
@@ -78,6 +84,7 @@ public class Ocarina : MonoBehaviour
     // Deletes a single note from the sheet
     public void DeleteNote()
     {
+        // Doesn't do anything if queue is empty
         if (queueIDList.Count == 0) return;
 
         queueIDList.RemoveAt(queueIDList.Count - 1);
@@ -87,30 +94,26 @@ public class Ocarina : MonoBehaviour
         noteObjQueue.RemoveAt(noteObjQueue.Count - 1);
     }
 
-    // Plays or pauses music
-    public void PlayPauseBtn()
+    #endregion
+    #region Music logic
+
+    // Plays or stops music
+    public void PlayStopBtn()
     {   
         // Starts playing the music
         if (!isMusicPlaying)
             StartMusic();
-        // Tells the script to stop playing music
+        // Stops playing the music
         else
-            stopMusic = true;
-    }
+        {
+            // Ends the music coroutine
+            StopCoroutine(musicCoroutine);
+            
+            // Renables player interactable stuff
+            _TogglePlay(true);
 
-    // Starts music
-    public void StopsMusic()
-    {
-        if (queueIDList.Count == 0) return;
-
-        isMusicPlaying = true;
-
-        // Disables player interactable stuff
-        ocarinaCG.interactable = false;
-        clearBtn.interactable = false;
-        deleteNoteBtn.interactable = false;
-        scrollbar.interactable = false;
-        StartCoroutine(PlayMusic());
+            _ResetSheet();
+        }
     }
 
     // Starts music
@@ -118,18 +121,10 @@ public class Ocarina : MonoBehaviour
     {
         if (queueIDList.Count == 0) return;
 
-        isMusicPlaying = true;
-
-        // Flips the play btn text to stop
-        playBtn.text = "Stop Music";
-
         // Disables player interactable stuff
-        ocarinaCG.interactable = false;
-        clearBtn.interactable = false;
-        deleteNoteBtn.interactable = false;
-        scrollbar.interactable = false;
+        _TogglePlay(false);
 
-        StartCoroutine(PlayMusic());
+        musicCoroutine = StartCoroutine(PlayMusic());
     }
 
     // Plays out queue of clips
@@ -137,9 +132,6 @@ public class Ocarina : MonoBehaviour
     {
         for (int i = 0; i < queueIDList.Count; i++)
         {
-            // Stops playing music
-            if (stopMusic) break;
-
             float time = defaultLength;
 
             // Does not play clip when on blank
@@ -155,51 +147,39 @@ public class Ocarina : MonoBehaviour
             noteImageQueue[i].color = colorHighlight;
 
             // Goes to note
-            ScrollToNote(i);
+            _ScrollToNote(i);
 
             yield return new WaitForSeconds(time + delay);
         }
 
         yield return null;
 
-        // Goes back to the start of the sheet
-        ScrollToNote(0);
-
-        // Reset note colors
-        foreach (Image image in noteImageQueue)
-            image.color = Color.white;
+        _ResetSheet();
 
         // Renables player interactable stuff
-        ocarinaCG.interactable = true;
-        clearBtn.interactable = true;
-        deleteNoteBtn.interactable = true;
-        scrollbar.interactable = true;
-
-        isMusicPlaying = false;
-        stopMusic = false;
-        // Flips back to play music
-        playBtn.text = "Play Music";
+        _TogglePlay(true);
     }
 
-    /// <summary> Updates the sheet's scroll rect location</summary>
-    private void ScrollToNote(int index)
-    {
-        int count = noteObjQueue.Count;
+    #endregion
+    #region UI logic
 
+    /// <summary> Updates the sheet's scroll rect position</summary>
+    private void _ScrollToNote(int index)
+    {
         // Defaults start position
-        if (count <= 1)
+        if (queueIDList.Count <= 1)
         {
             scrollRect.horizontalNormalizedPosition = 0f;
             return;
         }
-
+        
         LayoutRebuilder.ForceRebuildLayoutImmediate(scrollRect.content);
         
+        // Caculates whether scrolling is needed
         float contentWidth  = scrollRect.content.rect.width;
-        float viewportWidth = scrollRect.viewport != null ? scrollRect.viewport.rect.width
-            : ((RectTransform)scrollRect.transform).rect.width;
-
+        float viewportWidth = scrollRect.viewport.rect.width;
         float scrollableWidth = contentWidth - viewportWidth;
+        // If all the notes can fit onscreen without a scrollbar
         if (scrollableWidth <= 0f)
         {
             scrollRect.horizontalNormalizedPosition = 0f;
@@ -207,10 +187,36 @@ public class Ocarina : MonoBehaviour
         }
 
         // Caculates position of note
-        float itemWidth = contentWidth / count;
+        float itemWidth = contentWidth / queueIDList.Count;
         float itemCenter = itemWidth * (index + 0.5f);
         float targetX = itemCenter - viewportWidth * 0.5f;
 
         scrollRect.horizontalNormalizedPosition = Mathf.Clamp01(targetX / scrollableWidth);
     }
+
+    /// <summary> Toggles interactive stuff the player use atm when music is played or stopped</summary>
+    private void _TogglePlay(bool isInteractive)
+    {
+        ocarinaCG.interactable = isInteractive;
+        clearBtn.interactable = isInteractive;
+        deleteNoteBtn.interactable = isInteractive;
+        scrollbar.interactable = isInteractive;
+
+        isMusicPlaying = !isInteractive;
+        // Flips button text
+        playBtn.text = isInteractive ? "Play Music" : "Stop Music";
+    }
+
+    /// <summary> Resets sheet back to start</summary>
+    private void _ResetSheet()
+    {
+        // Goes back to the start of the sheet
+        _ScrollToNote(0);
+
+        // Reset note colors
+        foreach (Image image in noteImageQueue)
+            image.color = Color.white;
+    }
+
+    #endregion
 }

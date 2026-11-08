@@ -496,7 +496,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3940132765871052612, guid: 866eee24f7837e24f964938c2001b050, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[1].m_MethodName
-      value: AddMusic
+      value: AddNote
       objectReference: {fileID: 0}
     - target: {fileID: 3940132765871052612, guid: 866eee24f7837e24f964938c2001b050, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
@@ -953,7 +953,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4836426252840744833, guid: cbb38136049343b41a716c2cee19bd44, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[1].m_MethodName
-      value: AddMusic
+      value: AddNote
       objectReference: {fileID: 0}
     - target: {fileID: 4836426252840744833, guid: cbb38136049343b41a716c2cee19bd44, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[1].m_TargetAssemblyTypeName
@@ -1500,6 +1500,10 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 1102016962}
     - target: {fileID: 3940132765871052612, guid: 866eee24f7837e24f964938c2001b050, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[1].m_MethodName
+      value: AddNote
+      objectReference: {fileID: 0}
+    - target: {fileID: 3940132765871052612, guid: 866eee24f7837e24f964938c2001b050, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_ObjectArgument
       value: 
       objectReference: {fileID: 8300000, guid: 9c9e070769c23a74ab80d658b786a0bc, type: 3}
@@ -1564,7 +1568,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.HorizontalLayoutGroup
   m_Padding:
     m_Left: 0
-    m_Right: 0
+    m_Right: 55
     m_Top: 86
     m_Bottom: 0
   m_ChildAlignment: 3
@@ -1812,7 +1816,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 1102016962}
         m_TargetAssemblyTypeName: Ocarina, Assembly-CSharp
-        m_MethodName: PlayPauseBtn
+        m_MethodName: PlayStopBtn
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -2062,7 +2066,6 @@ MonoBehaviour:
   - {fileID: 8300000, guid: 51313661a7d3cf44894dab82fd27749e, type: 3}
   - {fileID: 8300000, guid: d54a86a478dd52c46bcd2a535f52e538, type: 3}
   isMusicPlaying: 0
-  stopMusic: 0
   notePrefab: {fileID: 685045615256173036, guid: bc212e79cb1f45b449bbc00b9a7ea4f7, type: 3}
   playBtn: {fileID: 1337531018}
   clearBtn: {fileID: 428965773}
@@ -2071,12 +2074,12 @@ MonoBehaviour:
   scrollRect: {fileID: 1941687115}
   scrollbar: {fileID: 1580796016}
   noteList: {fileID: 791185980}
-  noteObjQueue: []
-  noteImageQueue: []
   colorHighlight: {r: 0.41568628, g: 0.7137255, b: 0.9882353, a: 1}
-  queueIDList: 
   delay: 0
   defaultLength: 0.8
+  queueIDList: 
+  noteObjQueue: []
+  noteImageQueue: []
 --- !u!4 &1102016963
 Transform:
   m_ObjectHideFlags: 0
@@ -2679,7 +2682,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3940132765871052612, guid: 866eee24f7837e24f964938c2001b050, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
-      value: AddMusic
+      value: AddNote
       objectReference: {fileID: 0}
     - target: {fileID: 3940132765871052612, guid: 866eee24f7837e24f964938c2001b050, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[1].m_MethodName
@@ -2959,7 +2962,7 @@ MonoBehaviour:
   m_Colors:
     m_NormalColor: {r: 1, g: 1, b: 1, a: 1}
     m_HighlightedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 1}
-    m_PressedColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 1}
+    m_PressedColor: {r: 0.9, g: 0.9, b: 0.9, a: 1}
     m_SelectedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 1}
     m_DisabledColor: {r: 1, g: 1, b: 1, a: 1}
     m_ColorMultiplier: 1
@@ -2975,7 +2978,7 @@ MonoBehaviour:
     m_PressedTrigger: Pressed
     m_SelectedTrigger: Selected
     m_DisabledTrigger: Disabled
-  m_Interactable: 0
+  m_Interactable: 1
   m_TargetGraphic: {fileID: 440492642}
   m_HandleRect: {fileID: 440492641}
   m_Direction: 0
@@ -3617,7 +3620,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3940132765871052612, guid: 866eee24f7837e24f964938c2001b050, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[1].m_MethodName
-      value: AddMusic
+      value: AddNote
       objectReference: {fileID: 0}
     - target: {fileID: 3940132765871052612, guid: 866eee24f7837e24f964938c2001b050, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[1].m_TargetAssemblyTypeName
@@ -3660,6 +3663,10 @@ PrefabInstance:
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[1].m_Target
       value: 
       objectReference: {fileID: 1102016962}
+    - target: {fileID: 4836426252840744833, guid: cbb38136049343b41a716c2cee19bd44, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[1].m_MethodName
+      value: AddNote
+      objectReference: {fileID: 0}
     - target: {fileID: 4996696202256601777, guid: cbb38136049343b41a716c2cee19bd44, type: 3}
       propertyPath: m_Pivot.x
       value: 0.5
